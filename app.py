@@ -47,13 +47,12 @@ st.sidebar.header("Heatmap Parameters")
 min_spot = st.sidebar.number_input("Min Spot Price", min_value=0.01, value=40.00, step=1.0)
 max_spot = st.sidebar.number_input("Max Spot Price", min_value=0.01, value=150.00, step=1.0)
 
-st.table({
-    "Current Asset Price": [S],
-    "Strike Price": [K],
-    "Time to Maturity": [T],
-    "Volatility": [sigma],
-    "Risk-Free Interest Rate": [r]
-})
+# Responsive table
+st.markdown("### Current Parameters")
+st.dataframe({
+    "Parameter": ["Current Asset Price", "Strike Price", "Time to Maturity", "Volatility", "Risk-Free Rate"],
+    "Value": [f"${S:.2f}", f"${K:.2f}", f"{T:.2f} years", f"{sigma:.2%}", f"{r:.2%}"]
+}, use_container_width=True, hide_index=True)
 
 calls = call_black_schole(S, K, r, T, sigma)
 puts = put_black_schole(S, K, r, T, sigma)
@@ -68,6 +67,7 @@ st.markdown(
         font-size: 22px;
         font-weight: 600;
         color: white;
+        margin-bottom: 20px;
     }
     .call-box {
         background-color: #28a745;
@@ -75,10 +75,19 @@ st.markdown(
     .put-box {
         background-color: #dc3545;
     }
+    
+    @media (max-width: 768px) {
+        .box {
+            font-size: 18px;
+            padding: 15px;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+st.markdown("### Option Prices")
 
 col1, col2 = st.columns(2)
 
@@ -113,14 +122,15 @@ K_mesh, sigma_mesh = np.meshgrid(K_range, sigma_range)
 calls_heatmap = call_black_schole(S, K_mesh, r, T, sigma_mesh)
 puts_heatmap = put_black_schole(S, K_mesh, r, T, sigma_mesh)
 
+st.markdown("---")
 st.title("Option Price Heatmaps")
 
-# Create two columns for square heatmaps
+# Create columns for side-by-side heatmaps
 heatmap_col1, heatmap_col2 = st.columns(2)
 
 with heatmap_col1:
     st.subheader("Put Option Heatmap")
-    fig1, ax1 = plt.subplots(figsize=(8, 8))
+    fig1, ax1 = plt.subplots(figsize=(7, 7))
     
     sns.heatmap(
         puts_heatmap, 
@@ -131,19 +141,20 @@ with heatmap_col1:
         fmt=".2f", 
         cbar_kws={'label': 'Put Option Price'},
         ax=ax1,
-        square=True
+        square=True,
+        annot_kws={"size": 7}
     )
     
-    ax1.set_title("Black-Scholes Put Option", fontsize=14, fontweight='bold')
-    ax1.set_xlabel("Strike Price (K)", fontsize=12)
-    ax1.set_ylabel("Volatility (σ)", fontsize=12)
+    ax1.set_title("Black-Scholes Put Option", fontsize=12, fontweight='bold')
+    ax1.set_xlabel("Strike Price (K)", fontsize=10)
+    ax1.set_ylabel("Volatility (σ)", fontsize=10)
     
     plt.tight_layout()
     st.pyplot(fig1)
 
 with heatmap_col2:
     st.subheader("Call Option Heatmap")
-    fig2, ax2 = plt.subplots(figsize=(8, 8))
+    fig2, ax2 = plt.subplots(figsize=(7, 7))
     
     sns.heatmap(
         calls_heatmap, 
@@ -154,12 +165,13 @@ with heatmap_col2:
         fmt=".2f", 
         cbar_kws={'label': 'Call Option Price'},
         ax=ax2,
-        square=True
+        square=True,
+        annot_kws={"size": 7}
     )
     
-    ax2.set_title("Black-Scholes Call Option", fontsize=14, fontweight='bold')
-    ax2.set_xlabel("Strike Price (K)", fontsize=12)
-    ax2.set_ylabel("Volatility (σ)", fontsize=12)
+    ax2.set_title("Black-Scholes Call Option", fontsize=12, fontweight='bold')
+    ax2.set_xlabel("Strike Price (K)", fontsize=10)
+    ax2.set_ylabel("Volatility (σ)", fontsize=10)
     
     plt.tight_layout()
     st.pyplot(fig2)
